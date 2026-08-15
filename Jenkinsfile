@@ -1,0 +1,67 @@
+pipeline {
+  agent any
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout([$class: 'GitSCM',
+          branches: [[name: 'FETCH_HEAD']],
+          userRemoteConfigs: [[refspec: params.GERRIT_REFSPEC ?: 'refs/heads/main', url: 'ssh://qilyun@localhost:29418/raycaster-demo']],
+          extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']]
+        ])
+      }
+    }
+    stage('Issue Check') {
+      steps {
+        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+          dir('src') {
+            sh 'bash scripts/check-issue-ref.sh --strict FETCH_HEAD'
+          }
+        }
+      }
+    }
+    stage('Build') {
+      steps {
+        dir('src') {
+          sh 'cmake -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON && cmake --build build --target raycaster raycaster_ut -j $(nproc)'
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        dir('src/build') { sh 'ctest --output-on-failure -L raycaster' }
+      }
+    }
+    stage('Format') {
+      steps {
+        dir('src') {
+          sh '''#!/bin/bash
+FAIL=0
+FILES=$(find . -name "*.cpp" -o -name "*.hpp" | grep -v "/generated/" | grep -v "/build/" | sort)
+for f in $FILES; do
+  [ -f "$f" ] || continue
+  if ! /usr/bin/clang-format-15 --dry-run --Werror "$f" 2>/dev/null; then
+    echo ""; echo "==== FORMAT ISSUES: $f ===="
+    diff -u "$f" <(/usr/bin/clang-format-15 "$f") 2>/dev/null || true
+    FAIL=1
+  fi
+done
+if [ "$FAIL" != "0" ]; then echo "Format check FAILED"; exit 1; fi
+echo "Format check passed"'''
+        }
+      }
+    }
+    stage('Tidy') {
+      steps {
+        dir('src') {
+          sh '''echo "=== clang-tidy diagnostics ==="
+TIDY_BIN="$(ls -d "$HOME"/tools/llvm-*/bin/clang-tidy 2>/dev/null | sort -V | tail -1)"
+[ -n "$TIDY_BIN" ] || TIDY_BIN="clang-tidy-14"
+echo "Using: $TIDY_BIN"
+"$TIDY_BIN" --version || echo "version check failed"
+echo "================================"
+CLANG_TIDY_BIN="$TIDY_BIN" python3 scripts/run_tidy.py'''
+        }
+      }
+    }
+  }
+}
