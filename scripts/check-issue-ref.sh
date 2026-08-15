@@ -80,8 +80,15 @@ ISSUE_BODY="$(mktemp /tmp/issue-body.XXXXXX.json)"
 trap 'rm -f "$ISSUE_BODY"' EXIT
 
 GITHUB_API="https://api.github.com/repos/${GITHUB_REPO}/issues/${ISSUE_NUM}"
+# 私有仓库需要鉴权：有 GITHUB_TOKEN 环境变量则带上（GitHub Actions 自动注入；
+# Jenkins 侧需在 job/全局环境变量里配一个 PAT）。无 token 时退化为匿名（仅公开仓库可用）。
+AUTH_HEADER=()
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    AUTH_HEADER=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+fi
 HTTP_CODE=$(curl -s -o "$ISSUE_BODY" -w "%{http_code}" \
   -H "Accept: application/vnd.github.v3+json" \
+  "${AUTH_HEADER[@]}" \
   "$GITHUB_API" 2>/dev/null || echo "000")
 
 if [[ "$HTTP_CODE" != "200" ]]; then

@@ -60,6 +60,7 @@ x86（Linux/Windows + SDL）可玩的**纯光线投射**（Wolf3D-Like）demo，
 - **Jenkins**：job `raycaster-ci` 已建，CI 规则在工程内独立一份（见上）
 - **watcher**：两个 watcher 已启动（见上）
 - **双项目干扰审计完成（2026-08-15，harness）**：无 Docker 下与 flow_hub 共存，已修复 raycaster 侧 3 个风险：① `check-issue-ref.sh` 改用 mktemp 唯一临时文件（原共用 /tmp/issue_body.json，并发 CI 会互覆盖）② `ci-watcher.py` 默认 work-dir/state-file 改为 /tmp/raycaster-ci* ③ `gerrit-ci.sh` 默认 BUILD_DIR 改为 /tmp/raycaster-ci-build。**遗留（flowHub 侧不越权改）**：flowHub 的 `~/bin/i sg/cg` 用 `pkill -f gerrit-event-watcher` 会误杀 raycaster watcher——但 raycaster watcher 有自动重启循环（5s 恢复）+ poll watcher 兜底，影响有限
+- **私有仓库 issue 检查已支持 `GITHUB_TOKEN`**：`check-issue-ref.sh` 有 token 环境变量则带 Authorization header（GitHub Actions 自动注入；**Jenkins 侧需配全局环境变量 GITHUB_TOKEN = PAT**）。GitHub 仓库保持私有（未来某时刻公开）
 - **g 别名**：已加 `~/.bashrc` → `alias g='/home/hongxian/raycaster-demo/scripts/dev/g'`（脚本本体仍在工程内不入库；**迁移新 PC 时需重加此行**）
 - **g 脚本命令全集**：`push`/`pull`/`fetch`（git/gerrit）+ `build`/`run`/`ut`/`fm`/`fma`/`format`（工程）+ `sg`/`cg`（CI 基础设施：**只检查共享的 Gerrit/Jenkins 状态 + 管理 raycaster 自己的 watcher**，不启动共享服务，避免端口冲突）
 
