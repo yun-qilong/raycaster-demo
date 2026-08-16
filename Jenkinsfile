@@ -1,5 +1,8 @@
 pipeline {
   agent any
+  parameters {
+    choice(name: 'CI_MODE', choices: ['full', 'precheck'])
+  }
   stages {
     stage('Checkout') {
       steps {
@@ -11,6 +14,7 @@ pipeline {
       }
     }
     stage('Issue Check') {
+      when { expression { params.CI_MODE == 'full' } }
       steps {
         catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
           dir('src') {
@@ -32,6 +36,7 @@ pipeline {
       }
     }
     stage('Format') {
+      when { expression { params.CI_MODE == 'full' } }
       steps {
         dir('src') {
           sh '''#!/bin/bash
@@ -51,6 +56,7 @@ echo "Format check passed"'''
       }
     }
     stage('Tidy') {
+      when { expression { params.CI_MODE == 'full' } }
       steps {
         dir('src') {
           sh '''echo "=== clang-tidy diagnostics ==="
