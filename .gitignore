@@ -33,3 +33,6 @@ scripts/dev/
 
 # 日志
 logs/
+
+# 本地笔记（不入库）
+notes/

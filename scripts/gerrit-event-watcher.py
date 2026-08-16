@@ -10,17 +10,21 @@ import threading
 import urllib.request
 from base64 import b64encode
 
-GERRIT_HOST = "localhost"
-GERRIT_PORT = "29418"
-GERRIT_USER = "ci"
-SSH_KEY = os.path.expanduser("~/.ssh/ci_gerrit_key")
-JENKINS_URL = "http://localhost:8090"
-JENKINS_JOB = "raycaster-ci"
-JENKINS_USER = "admin"
+# All settings overridable via RC_* environment variables (e.g. after a port
+# migration, restart the watcher with RC_GERRIT_PORT=NNNN — no code change).
+GERRIT_HOST = os.environ.get("RC_GERRIT_HOST", "localhost")
+GERRIT_PORT = os.environ.get("RC_GERRIT_PORT", "19418")
+GERRIT_USER = os.environ.get("RC_GERRIT_USER", "ci")
+SSH_KEY = os.environ.get("RC_SSH_KEY", os.path.expanduser("~/.ssh/ci_gerrit_key"))
+JENKINS_URL = os.environ.get("RC_JENKINS_URL", "http://localhost:18090")
+JENKINS_JOB = os.environ.get("RC_JENKINS_JOB", "raycaster-ci")
+JENKINS_USER = os.environ.get("RC_JENKINS_USER", "admin")
 # Read from secrets file
-ADMIN_PASS_FILE = "/opt/jenkins/home/secrets/initialAdminPassword"
+ADMIN_PASS_FILE = os.environ.get(
+    "RC_ADMIN_PASS_FILE", "/opt/jenkins/home/secrets/initialAdminPassword"
+)
 
-PROJECT_PATTERN = "raycaster-demo"  # exact match for now
+PROJECT_PATTERN = os.environ.get("RC_GERRIT_PROJECT", "raycaster-demo")  # exact match
 
 JENKINS_CLI = "/tmp/jenkins-cli.jar"
 
@@ -50,7 +54,7 @@ def trigger_jenkins(change_num, patchset_num, revision, refspec, branch, event_t
     cmd = [
         "java", "-jar", JENKINS_CLI,
         "-s", JENKINS_URL,
-        "-auth", f"admin:{admin_pass}",
+        "-auth", f"{JENKINS_USER}:{admin_pass}",
         "build", JENKINS_JOB,
         "-w",
     ]
@@ -143,7 +147,7 @@ def get_jenkins_api(path):
     admin_pass = read_admin_pass()
     if not admin_pass:
         return None
-    auth_str = b64encode(f"admin:{admin_pass}".encode()).decode()
+    auth_str = b64encode(f"{JENKINS_USER}:{admin_pass}".encode()).decode()
     req = urllib.request.Request(f"{JENKINS_URL}{path}")
     req.add_header("Authorization", f"Basic {auth_str}")
     try:
@@ -156,7 +160,7 @@ def get_jenkins_api(path):
 def poll_build_result(build_url, change_num, patchset_num):
     """Poll Jenkins build until completion, then post final Verified vote."""
     # Extract job name and build number from URL
-    # URL: http://localhost:8090/job/flowhub-ci/123
+    # URL: http://localhost:18090/job/raycaster-ci/123
     parts = build_url.rstrip("/").split("/")
     build_num = parts[-1]
     job_name = parts[-2]

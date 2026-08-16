@@ -5,7 +5,7 @@ pipeline {
       steps {
         checkout([$class: 'GitSCM',
           branches: [[name: 'FETCH_HEAD']],
-          userRemoteConfigs: [[refspec: params.GERRIT_REFSPEC ?: 'refs/heads/main', url: 'ssh://qilyun@localhost:29418/raycaster-demo']],
+          userRemoteConfigs: [[refspec: params.GERRIT_REFSPEC ?: 'refs/heads/main', url: 'ssh://qilyun@localhost:19418/raycaster-demo']],
           extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']]
         ])
       }
@@ -22,7 +22,7 @@ pipeline {
     stage('Build') {
       steps {
         dir('src') {
-          sh 'cmake -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON && cmake --build build --target raycaster raycaster_ut -j $(nproc)'
+          sh 'cmake -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build --target raycaster raycaster_ut -j $(nproc)'
         }
       }
     }

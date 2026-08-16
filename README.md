@@ -53,6 +53,6 @@ scripts/         # 本地 CI 规则（Jenkinsfile/gerrit-ci.sh/watcher 等）
 ## CI
 
 - **GitHub Actions**：`.github/workflows/ci.yml`（push main 触发：Issue Check / Build / Test / Format / Tidy）
-- **Gerrit 评审**：`ssh://qilyun@localhost:29418/raycaster-demo`
-- **Jenkins**：`raycaster-ci`（http://localhost:8090/job/raycaster-ci）
+- **Gerrit 评审**：`ssh://qilyun@localhost:19418/raycaster-demo`（HTTP 18080）
+- **Jenkins**：`raycaster-ci`（http://localhost:18090/job/raycaster-ci）
 - 本地 CI 规则在 `scripts/` 下独立维护（与 flow_hub 可并行共存）

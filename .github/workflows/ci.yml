@@ -14,6 +14,8 @@ jobs:
 
       - name: Issue Check
         continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash scripts/check-issue-ref.sh HEAD
 
       - name: Install dependencies
