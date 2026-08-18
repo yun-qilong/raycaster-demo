@@ -58,9 +58,35 @@ class Fixed
         return raw_ == o.raw_;
     }
 
+    constexpr bool operator<(Fixed o) const
+    {
+        return raw_ < o.raw_;
+    }
+
+    constexpr bool operator<=(Fixed o) const
+    {
+        return raw_ <= o.raw_;
+    }
+
+    constexpr bool operator>(Fixed o) const
+    {
+        return raw_ > o.raw_;
+    }
+
+    constexpr bool operator>=(Fixed o) const
+    {
+        return raw_ >= o.raw_;
+    }
+
     [[nodiscard]] constexpr int32_t toInt() const
     {
         return raw_ >> kFracBits;
+    }
+
+    // 绝对值（补码取负；调用方需保证不是 INT32_MIN）
+    [[nodiscard]] constexpr Fixed abs() const
+    {
+        return raw_ < 0 ? fromRaw(-raw_) : *this;
     }
 
   private:

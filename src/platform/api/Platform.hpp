@@ -2,20 +2,12 @@
 // core 只依赖此接口，零平台宏。SDL（PC）与未来 MCU 后端各自实现。
 #pragma once
 
+#include "core/Color.hpp"
+
 #include <cstdint>
 
 namespace ray
 {
-
-// 24-bit RGB 像素（3 字节，与 SDL_PIXELFORMAT_RGB24 对齐）
-struct Color
-{
-    uint8_t r_ = 0;
-    uint8_t g_ = 0;
-    uint8_t b_ = 0;
-};
-
-static_assert(sizeof(Color) == 3, "Color must be tightly packed 3 bytes");
 
 // 每 tick 采样的输入状态（键位 = 状态取最新；开火等事件后续再扩）
 struct InputState
