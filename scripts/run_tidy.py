@@ -297,7 +297,7 @@ def main():
     with open(ccdb_full_path) as f:
         db = json.load(f)
 
-    project_entries = [e for e in db if "/_deps/" not in e.get("file", "")]
+    project_entries = [e for e in db if "/_deps/" not in e.get("file", "") and "/generated/" not in e.get("file", "") and "/build/" not in e.get("file", "")]
     skipped = len(db) - len(project_entries)
 
     with open(ccdb_path, "w") as f:

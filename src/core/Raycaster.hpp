@@ -3,6 +3,7 @@
 
 #include "core/Color.hpp"
 #include "core/Fixed.hpp"
+#include "core/FixedVec2.hpp"
 #include "core/Map.hpp"
 #include "core/Vec2.hpp"
 
@@ -18,7 +19,6 @@ enum class WallOrientation : uint8_t
     Vertical,
 };
 
-using FixedVec2 = Vec2<Fixed>;
 using IntVec2 = Vec2<int>;
 
 struct Camera
@@ -68,8 +68,14 @@ inline ColumnHit ddaCastColumn(const Camera &cam, int x, int width, int height)
     const WallOrientation wallOrientHit =
         marchUntilHit(marchGrid, distToNextBoundary, distPerGrid, gridStep);
 
-    const Fixed perpendicularDist =
+    Fixed perpendicularDist =
         computePerpendicularDist(wallOrientHit, distToNextBoundary, distPerGrid);
+
+    constexpr Fixed kMinDist = Fixed::fromRaw(1); // 1/65536 ≈ 0.000015 格，防除零
+    if (perpendicularDist < kMinDist)
+    {
+        perpendicularDist = kMinDist;
+    }
 
     return buildColumnHit(marchGrid, wallOrientHit, perpendicularDist, height);
 }
@@ -148,10 +154,12 @@ inline void initDdaStep(IntVec2 &gridStep, FixedVec2 &distToNextBoundary, const 
 inline WallOrientation marchUntilHit(IntVec2 &marchGrid, FixedVec2 &distToNextBoundary,
                                      const FixedVec2 &distPerGrid, const IntVec2 &gridStep)
 {
+    constexpr int kMaxDdaSteps = Map::kWidth + Map::kHeight + 8;
+
     bool hit = false;
     WallOrientation wallOrientation = WallOrientation::Vertical;
 
-    while (!hit)
+    for (int step = 0; step < kMaxDdaSteps; ++step)
     {
         if (distToNextBoundary.x_ < distToNextBoundary.y_)
         {
@@ -166,6 +174,11 @@ inline WallOrientation marchUntilHit(IntVec2 &marchGrid, FixedVec2 &distToNextBo
             wallOrientation = WallOrientation::Horizontal;
         }
         hit = Map::isWall(marchGrid.x_, marchGrid.y_);
+
+        if (hit)
+        {
+            return wallOrientation;
+        }
     }
 
     return wallOrientation;

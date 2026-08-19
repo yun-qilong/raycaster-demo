@@ -23,7 +23,7 @@ class Fixed
 
     static constexpr Fixed fromInt(int32_t v)
     {
-        return fromRaw(v << kFracBits);
+        return fromRaw(static_cast<Raw>(static_cast<uint32_t>(v) << kFracBits));
     }
 
     [[nodiscard]] constexpr Raw raw() const
@@ -41,7 +41,11 @@ class Fixed
         return fromRaw(raw_ - o.raw_);
     }
 
-    // 定点乘：a*b >> 16（64 位中间量避免溢出）
+    constexpr Fixed operator-() const
+    {
+        return fromRaw(-raw_);
+    }
+
     constexpr Fixed operator*(Fixed o) const
     {
         return fromRaw(static_cast<Raw>((static_cast<int64_t>(raw_) * o.raw_) >> kFracBits));

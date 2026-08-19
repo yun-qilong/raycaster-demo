@@ -21,6 +21,18 @@ option(RAYCASTER_BUILD_TESTS "构建单元测试" ON)
 # ---- 依赖：SDL2（平台层 PC 后端）--------------------------------
 find_package(SDL2 REQUIRED)
 
+# ---- 代码生成：MapData.hpp（由 mapgen.py 从 .map 生成）------------
+add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/src/generated/MapData.hpp
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/mapgen.py
+    DEPENDS
+        ${CMAKE_SOURCE_DIR}/scripts/mapgen.py
+        ${CMAKE_SOURCE_DIR}/tools/maps/default.map
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating MapData.hpp from default.map"
+)
+add_custom_target(gen_mapdata DEPENDS ${CMAKE_SOURCE_DIR}/src/generated/MapData.hpp)
+
 # ---- 子目录 -----------------------------------------------------
 add_subdirectory(src)
 

@@ -20,7 +20,7 @@ class SdlPlatform final : public Platform
     SdlPlatform &operator=(const SdlPlatform &) = delete;
 
     uint32_t getTicks() override;
-    InputState readInput() override;
+    void sampleInput(InputState &out) override;
     void drawBuffer(const Color *pixels) override;
     [[nodiscard]] int screenWidth() const override;
     [[nodiscard]] int screenHeight() const override;
@@ -31,6 +31,8 @@ class SdlPlatform final : public Platform
     SDL_Texture *texture_ = nullptr;
     int width_ = 0;
     int height_ = 0;
+    int mouseDeltaX_ = 0;
+    int mouseDeltaY_ = 0;
 };
 
 } // namespace ray
