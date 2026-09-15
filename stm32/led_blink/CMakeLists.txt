@@ -31,6 +31,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
+include(FetchContent)
+FetchContent_Declare(lcdriv
+    GIT_REPOSITORY https://github.com/yun-qilong/lcdriv.git
+    GIT_TAG        main
+    GIT_SHALLOW    TRUE)
+FetchContent_MakeAvailable(lcdriv)
+
 # Enable CMake support for ASM, C and C++ languages
 enable_language(C ASM CXX)
 
@@ -49,6 +56,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/cpp_hello.cpp
+    Core/Src/lcd_test.cpp
 )
 
 # Add include paths
@@ -67,6 +75,7 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
+    lcdriv
 
     # Add user defined libraries
 )

@@ -58,6 +58,7 @@ static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 /* C++ 验证函数：cpp_hello.cpp 中定义，用 extern "C" 导出以便 C 调用 */
 extern void cppHello(void);
+extern void lcdTest(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,6 +104,12 @@ int main(void)
   const char *msg = "Hello from H743!\r\n";
   HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
   cppHello();
+  /* 构建时间戳：标记"这是哪一版固件"。
+     用编译期常量（本板没配 RTC，拿不到运行时日期）。
+     串口打出来的时间应与本次编译时间一致；不一致说明烧到了旧 hex。 */
+  const char *buildStamp = "Build: " __DATE__ " " __TIME__ "\r\n";
+  HAL_UART_Transmit(&huart1, (uint8_t *)buildStamp, strlen(buildStamp), HAL_MAX_DELAY);
+  lcdTest();
   /* USER CODE END 2 */
 
   /* Infinite loop */
