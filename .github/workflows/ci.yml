@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake -S pc -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           cmake --build build --target raycaster raycaster_ut -j $(nproc)
 
       - name: Test
@@ -34,7 +34,7 @@ jobs:
 
       - name: Format
         run: |
-          FILES=$(find src tests -name "*.cpp" -o -name "*.hpp" | grep -v "/build/" | grep -v "/generated/" | sort)
+          FILES=$(find src pc -name "*.cpp" -o -name "*.hpp" | grep -v "/build/" | grep -v "/generated/" | sort)
           FAIL=0
           for f in $FILES; do
             [ -f "$f" ] || continue

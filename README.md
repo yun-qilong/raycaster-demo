@@ -8,9 +8,9 @@ x86（Linux/Windows + SDL）可玩的**纯光线投射**（Wolf3D-Like）demo，
 依赖：CMake ≥ 3.20、SDL2 开发库（`sudo apt install -y libsdl2-dev`）、g++ / clang。
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake -S pc -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --target raycaster -j "$(nproc)"
-./build/src/raycaster
+./build/raycaster
 ```
 
 ## 测试
@@ -23,19 +23,22 @@ ctest --test-dir build -L raycaster
 ## 目录结构
 
 ```
-src/
+src/             # 共享源码树（PC 与 MCU 构建树各自按需引入）
   core/          # renderer/math/container/logic（平台无感，零平台宏）
+  generated/     # MapData.hpp（mapgen 生成，不入库）
   platform/
-    api/         # Platform 接口：getTicks/readInput/drawBuffer
+    api/         # Platform 接口：getTicks/sampleInput/drawBuffer
     sdl/         # SDL 后端（PC：窗口/键盘/时钟）
+    mcu/         # （规划）MCU 后端
+pc/              # PC 产品：构建入口 CMakeLists + main/NoHeap + tests/（gtest）
+stm32/           # MCU 产品：CubeMX 工程（独立构建树）
 tools/           # asset pipeline（贴图/地图转 C 数组）
-tests/           # 单测（gtest，ctest label: raycaster）
 scripts/         # 本地 CI 规则（Jenkinsfile/gerrit-ci.sh/watcher 等）
 ```
 
 ## 可移植约束（红线）
 
-- 无堆：Linux 调试时重载 `operator new` 为报错（`src/NoHeap.cpp`）
+- 无堆：Linux 调试时重载 `operator new` 为报错（`pc/NoHeap.cpp`）
 - 定点数 16.16（不用 float）
 - 固定数组 / BoundedVector
 - `-fno-exceptions -fno-rtti -fno-threadsafe-statics`

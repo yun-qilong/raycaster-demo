@@ -1,5 +1,5 @@
 {
-  "src/main.cpp": {
+  "pc/main.cpp": {
     "cppcoreguidelines-pro-bounds-constant-array-index": 2,
     "cppcoreguidelines-pro-type-vararg": 1,
     "modernize-concat-nested-namespaces": 3,

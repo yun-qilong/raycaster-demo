@@ -138,7 +138,7 @@ main() {
   echo ""
   echo ">>> 编译"
   run_check "build" "build" bash -c "
-    cmake -B '${BUILD_DIR}/build' '${SRC_DIR}' \
+    cmake -B '${BUILD_DIR}/build' '${SRC_DIR}/pc' \
       -DCMAKE_BUILD_TYPE=Release \
       -DRAYCASTER_BUILD_TESTS=ON \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \

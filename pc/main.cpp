@@ -1,4 +1,4 @@
-// src/main.cpp — 游戏主循环（固定时间步长、输入、更新、渲染）
+// pc/main.cpp — 游戏主循环（固定时间步长、输入、更新、渲染）
 // 数据流注入：平台调用只在此文件，core（Map/Raycaster）零平台依赖。
 #include "core/Fixed.hpp"
 #include "core/Movement.hpp"

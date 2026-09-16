@@ -26,7 +26,7 @@ pipeline {
     stage('Build') {
       steps {
         dir('src') {
-          sh 'cmake -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build --target raycaster raycaster_ut -j $(nproc)'
+          sh 'cmake -S pc -B build -DCMAKE_BUILD_TYPE=Release -DRAYCASTER_BUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build --target raycaster raycaster_ut -j $(nproc)'
         }
       }
     }
