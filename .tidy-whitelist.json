@@ -3,8 +3,6 @@
     "cppcoreguidelines-pro-bounds-constant-array-index": 2,
     "cppcoreguidelines-pro-type-vararg": 1,
     "modernize-concat-nested-namespaces": 3,
-    "readability-function-cognitive-complexity": 1,
-    "readability-function-size": 1,
     "readability-identifier-naming": 10,
     "readability-uppercase-literal-suffix": 5
   },

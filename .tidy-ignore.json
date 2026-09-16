@@ -1,0 +1,11 @@
+{
+  "ignored_checks": [],
+  "path_rules": [
+    {
+      "pattern": "src/platform/*/*",
+      "ignored_checks": [
+        "readability-convert-member-functions-to-static"
+      ]
+    }
+  ]
+}

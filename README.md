@@ -24,10 +24,11 @@ ctest --test-dir build -L raycaster
 
 ```
 src/             # 共享源码树（PC 与 MCU 构建树各自按需引入）
+  utils/         # 通用 C++ 工具（CRTP 样板等，零项目依赖）
   core/          # renderer/math/container/logic（平台无感，零平台宏）
   generated/     # MapData.hpp（mapgen 生成，不入库）
   platform/
-    api/         # Platform 接口：getTicks/sampleInput/drawBuffer
+    api/         # Platform<Impl> CRTP 接口：getTicks/sampleInput/drawBuffer
     sdl/         # SDL 后端（PC：窗口/键盘/时钟）
     mcu/         # （规划）MCU 后端
 pc/              # PC 产品：构建入口 CMakeLists + main/NoHeap + tests/（gtest）

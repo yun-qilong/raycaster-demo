@@ -1,4 +1,3 @@
-// src/platform/sdl/SdlPlatform.cpp — SDL 后端实现
 #include "platform/sdl/SdlPlatform.hpp"
 
 #include <SDL.h>
@@ -13,7 +12,6 @@ constexpr Uint32 kPixelFormat = SDL_PIXELFORMAT_RGB24;
 
 SdlPlatform::SdlPlatform(int width, int height) : width_(width), height_(height)
 {
-    // 注意：SDL_Init 必须先于任何创建调用，因此资源不能在初始化列表中创建。
     SDL_Init(SDL_INIT_VIDEO);
     window_ = SDL_CreateWindow("Raycaster Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                width_, height_, SDL_WINDOW_RESIZABLE);
@@ -39,12 +37,12 @@ SdlPlatform::~SdlPlatform()
     SDL_Quit();
 }
 
-uint32_t SdlPlatform::getTicks()
+uint32_t SdlPlatform::getTicksImpl()
 {
     return SDL_GetTicks();
 }
 
-void SdlPlatform::sampleInput(InputState &out)
+void SdlPlatform::sampleInputImpl(InputState &out)
 {
     out.heldMask = 0;
     out.moveX = Fixed::fromInt(0);
@@ -63,7 +61,6 @@ void SdlPlatform::sampleInput(InputState &out)
 
     const Uint8 *keys = SDL_GetKeyboardState(nullptr);
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    // SDL 键盘状态是 C API 返回的指针数组，必须按下标访问
     if (keys[SDL_SCANCODE_W] != 0)
     {
         out.moveY = out.moveY + Fixed::fromInt(1);
@@ -98,28 +95,27 @@ void SdlPlatform::sampleInput(InputState &out)
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-    // 读取鼠标相对移动
     int mouseDx = 0;
     int mouseDy = 0;
     SDL_GetRelativeMouseState(&mouseDx, &mouseDy);
-    // SDL 相对鼠标：右移为正；FPS 惯例：鼠标右 → 视角右（需取反因为旋转矩阵正角=逆时针）
+
     out.turnDelta = -mouseDx;
 }
 
-void SdlPlatform::drawBuffer(const Color *pixels)
+void SdlPlatform::drawBufferImpl(const Color *pixels)
 {
-    SDL_UpdateTexture(texture_, nullptr, pixels, width_ * 3); // RGB24: 3 字节/像素
+    SDL_UpdateTexture(texture_, nullptr, pixels, width_ * 3);
     SDL_RenderClear(renderer_);
     SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
     SDL_RenderPresent(renderer_);
 }
 
-int SdlPlatform::screenWidth() const
+int SdlPlatform::screenWidthImpl() const
 {
     return width_;
 }
 
-int SdlPlatform::screenHeight() const
+int SdlPlatform::screenHeightImpl() const
 {
     return height_;
 }

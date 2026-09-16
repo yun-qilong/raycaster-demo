@@ -10,20 +10,20 @@ struct SDL_Texture;
 namespace ray
 {
 
-class SdlPlatform final : public Platform
+class SdlPlatform final : public Platform<SdlPlatform>
 {
   public:
     SdlPlatform(int width, int height);
-    ~SdlPlatform() override;
+    ~SdlPlatform();
 
     SdlPlatform(const SdlPlatform &) = delete;
     SdlPlatform &operator=(const SdlPlatform &) = delete;
 
-    uint32_t getTicks() override;
-    void sampleInput(InputState &out) override;
-    void drawBuffer(const Color *pixels) override;
-    [[nodiscard]] int screenWidth() const override;
-    [[nodiscard]] int screenHeight() const override;
+    uint32_t getTicksImpl();
+    void sampleInputImpl(InputState &out);
+    void drawBufferImpl(const Color *pixels);
+    [[nodiscard]] int screenWidthImpl() const;
+    [[nodiscard]] int screenHeightImpl() const;
 
   private:
     SDL_Window *window_ = nullptr;

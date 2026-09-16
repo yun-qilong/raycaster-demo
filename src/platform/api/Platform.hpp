@@ -4,6 +4,7 @@
 
 #include "core/Color.hpp"
 #include "core/Fixed.hpp"
+#include "utils/CrtpBase.hpp"
 
 #include <cstdint>
 
@@ -27,16 +28,34 @@ struct InputState
     bool quit = false;               // 请求退出（关窗口 / ESC）
 };
 
-class Platform
+template <typename Impl>
+class Platform : public utils::CrtpBase<Impl>
 {
   public:
-    virtual ~Platform() = default;
+    uint32_t getTicks()
+    {
+        return this->getImplementation().getTicksImpl(); // 毫秒时钟
+    }
 
-    virtual uint32_t getTicks() = 0;                  // 毫秒时钟
-    virtual void sampleInput(InputState &out) = 0;    // 采样当前输入状态
-    virtual void drawBuffer(const Color *pixels) = 0; // 整帧像素（全屏）
-    [[nodiscard]] virtual int screenWidth() const = 0;
-    [[nodiscard]] virtual int screenHeight() const = 0;
+    void sampleInput(InputState &out)
+    {
+        this->getImplementation().sampleInputImpl(out); // 采样当前输入状态
+    }
+
+    void drawBuffer(const Color *pixels)
+    {
+        this->getImplementation().drawBufferImpl(pixels); // 整帧像素（全屏）
+    }
+
+    [[nodiscard]] int screenWidth() const
+    {
+        return this->getImplementation().screenWidthImpl();
+    }
+
+    [[nodiscard]] int screenHeight() const
+    {
+        return this->getImplementation().screenHeightImpl();
+    }
 };
 
 } // namespace ray
