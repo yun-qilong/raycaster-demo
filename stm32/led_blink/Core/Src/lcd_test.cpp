@@ -1,6 +1,9 @@
 #include "main.h"
 
-#include <cstddef>
+#include "lcdriv.hpp"
+
+#include <cstring>
+#include <optional>
 
 extern SPI_HandleTypeDef hspi1;
 extern UART_HandleTypeDef huart1;
@@ -8,13 +11,70 @@ extern UART_HandleTypeDef huart1;
 namespace
 {
 
-constexpr uint16_t kPanelWidth = 320;
-constexpr uint16_t kPanelHeight = 240;
-constexpr uint16_t kLineBytes = kPanelWidth * 2;
+// ---------------------------------------------------------------------------
+// v20: v18 established the operating point. Same static picture, four clocks:
+//
+//    5 MHz  structural corruption (stripes, misalignment)
+//   10 MHz  structural corruption
+//   20 MHz  occasional wrong-colour pixels (bit errors)
+//   40 MHz  STABLE
+//
+// 40 MHz is therefore the working point - it is also the frequency this panel
+// was originally brought up at. This build locks it in and is the first image
+// meant to be looked at rather than interrogated:
+//
+//   white background, green reference block at (40,40), red block in the middle
+//   Key1 / Key2 move the red block one step left / right
+//   one pushFrame per frame, CS-split framing, heartbeat on the UART
+//
+// On top of the library fix from v15 (command byte and parameters in separate
+// CS frames) this is the configuration that produced a stable picture.
+// ---------------------------------------------------------------------------
+
+constexpr int kPanelWidth = 320;
+constexpr int kPanelHeight = 240;
+
+constexpr uint16_t kWhite = 0xFFFF;
+constexpr uint16_t kBoxColor = 0xF800;
+constexpr uint16_t kGreenBoxColor = 0x07E0;
+constexpr int32_t kBoxSize = 40;
+constexpr int32_t kBoxCenterX = (kPanelWidth - kBoxSize) / 2;
+constexpr int32_t kBoxY = (kPanelHeight - kBoxSize) / 2;
+constexpr int32_t kBoxStep = 100;
+constexpr int32_t kBoxSpeedPx = 8;
+constexpr int32_t kGreenBoxX = 40;
+constexpr int32_t kGreenBoxY = 40;
+
+using Lcd = LcdDriver<BusType::SPI, ControllerType::ILI9341, kPanelWidth, kPanelHeight>;
+
+std::optional<Lcd> lcd;
+
+const GpioPin kDcPin{GPIOB, GPIO_PIN_0};
+const GpioPin kCsPins[1] = {{GPIOA, GPIO_PIN_4}};
+const GpioPin kRstPins[1] = {{GPIOB, GPIO_PIN_1}};
+
+__attribute__((section(".lcdFrameBuffer"), aligned(32))) uint8_t frameBuffer[Lcd::kBytes];
 
 void uartWrite(const char *text, uint16_t length)
 {
     HAL_UART_Transmit(&huart1, reinterpret_cast<const uint8_t *>(text), length, HAL_MAX_DELAY);
+}
+
+void uartText(const char *text)
+{
+    uartWrite(text, static_cast<uint16_t>(strlen(text)));
+}
+
+void uartNumber(uint32_t value)
+{
+    char digits[12] = {};
+    int pos = 11;
+    do
+    {
+        digits[--pos] = static_cast<char>('0' + (value % 10U));
+        value /= 10U;
+    } while (value != 0U && pos > 0);
+    uartWrite(&digits[pos], static_cast<uint16_t>(11 - pos));
 }
 
 void printTestStamp()
@@ -23,144 +83,84 @@ void printTestStamp()
     uartWrite(text, static_cast<uint16_t>(sizeof(text) - 1));
 }
 
-void rawWriteParams(uint8_t command, const uint8_t *values, uint16_t length)
-{
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-    uint8_t cmd = command;
-    HAL_SPI_Transmit(&hspi1, &cmd, 1, HAL_MAX_DELAY);
-    if (length > 0)
-    {
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-        HAL_SPI_Transmit(&hspi1, const_cast<uint8_t *>(values), length, HAL_MAX_DELAY);
-    }
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
-}
-
-void resetPanel()
-{
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
-    HAL_Delay(20);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
-    HAL_Delay(150);
-}
-
-uint8_t lineBuffer[kLineBytes];
-
-void buildLine(uint16_t color, uint16_t pixelCount)
+void paintRect(int32_t x, int32_t y, int32_t size, uint16_t color)
 {
     const uint8_t high = static_cast<uint8_t>(color >> 8);
     const uint8_t low = static_cast<uint8_t>(color & 0xFF);
-    for (uint16_t i = 0; i < pixelCount * 2; i += 2)
+    for (int32_t row = 0; row < size; ++row)
     {
-        lineBuffer[i] = high;
-        lineBuffer[i + 1] = low;
+        uint8_t *pixel = &frameBuffer[((y + row) * kPanelWidth + x) * 2];
+        for (int32_t i = 0; i < size; ++i)
+        {
+            pixel[i * 2] = high;
+            pixel[i * 2 + 1] = low;
+        }
     }
 }
 
-void writePixels(uint16_t rows, uint16_t rowBytes)
+void composeFrame(int32_t boxX)
 {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-    uint8_t cmd = 0x2C;
-    HAL_SPI_Transmit(&hspi1, &cmd, 1, HAL_MAX_DELAY);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-    for (uint16_t i = 0; i < rows; ++i)
+    memset(frameBuffer, 0xFF, sizeof(frameBuffer));
+    paintRect(kGreenBoxX, kGreenBoxY, kBoxSize, kGreenBoxColor);
+    paintRect(boxX, kBoxY, kBoxSize, kBoxColor);
+}
+
+bool keyPressed(GPIO_TypeDef *port, uint16_t pin)
+{
+    return HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_SET;
+}
+
+int32_t resolveTargetX(int32_t currentTargetX, bool k1Down, bool k2Down, bool k1Held, bool k2Held)
+{
+    if ((k1Down and k2Held) or (k2Down and k1Held))
     {
-        HAL_SPI_Transmit(&hspi1, lineBuffer, rowBytes, HAL_MAX_DELAY);
+        return kBoxCenterX;
     }
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
-}
-
-void fillPanel(uint16_t color)
-{
-    const uint8_t col[4] = {0x00, 0x00, static_cast<uint8_t>((kPanelWidth - 1) >> 8),
-                            static_cast<uint8_t>(kPanelWidth - 1)};
-    const uint8_t page[4] = {0x00, 0x00, static_cast<uint8_t>((kPanelHeight - 1) >> 8),
-                             static_cast<uint8_t>(kPanelHeight - 1)};
-    rawWriteParams(0x2A, col, 4);
-    rawWriteParams(0x2B, page, 4);
-    buildLine(color, kPanelWidth);
-    writePixels(kPanelHeight, kPanelWidth * 2);
-}
-
-void fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
-{
-    const uint16_t xEnd = x + width - 1;
-    const uint16_t yEnd = y + height - 1;
-    const uint8_t col[4] = {static_cast<uint8_t>(x >> 8), static_cast<uint8_t>(x),
-                            static_cast<uint8_t>(xEnd >> 8), static_cast<uint8_t>(xEnd)};
-    const uint8_t page[4] = {static_cast<uint8_t>(y >> 8), static_cast<uint8_t>(y),
-                             static_cast<uint8_t>(yEnd >> 8), static_cast<uint8_t>(yEnd)};
-    rawWriteParams(0x2A, col, 4);
-    rawWriteParams(0x2B, page, 4);
-    buildLine(color, width);
-    writePixels(height, width * 2);
-}
-
-void initPanelReset()
-{
-    rawWriteParams(0x01, nullptr, 0);
-    HAL_Delay(120);
-    rawWriteParams(0x11, nullptr, 0);
-    HAL_Delay(120);
-}
-
-void initPanelConfig()
-{
-    const uint8_t colmod = 0x55;
-    rawWriteParams(0x3A, &colmod, 1);
-    const uint8_t madctl = 0x28;
-    rawWriteParams(0x36, &madctl, 1);
-    const uint8_t teon = 0x00;
-    rawWriteParams(0x35, &teon, 1);
-    const uint8_t pwctr1 = 0x23;
-    rawWriteParams(0xC0, &pwctr1, 1);
-    const uint8_t pwctr2 = 0x10;
-    rawWriteParams(0xC1, &pwctr2, 1);
-    const uint8_t vmctr1[2] = {0x3E, 0x28};
-    rawWriteParams(0xC5, vmctr1, 2);
-    const uint8_t vmctr2 = 0x86;
-    rawWriteParams(0xC7, &vmctr2, 1);
-    const uint8_t frmctr1[2] = {0x00, 0x18};
-    rawWriteParams(0xB1, frmctr1, 2);
-    const uint8_t disctrl[3] = {0x08, 0x82, 0x27};
-    rawWriteParams(0xB6, disctrl, 3);
-    const uint8_t enable3g = 0x00;
-    rawWriteParams(0xF2, &enable3g, 1);
-    const uint8_t gamset = 0x01;
-    rawWriteParams(0x26, &gamset, 1);
-    rawWriteParams(0x20, nullptr, 0);
-}
-
-void initPanel()
-{
-    initPanelReset();
-    initPanelConfig();
-    rawWriteParams(0x29, nullptr, 0);
-    HAL_Delay(50);
-}
-
-struct StrokeRect
-{
-    uint16_t x;
-    uint16_t y;
-    uint16_t width;
-    uint16_t height;
-};
-
-constexpr StrokeRect kGlyphStrokes[] = {
-    {80, 179, 160, 16},
-    {130, 45, 16, 150},
-    {130, 125, 84, 16},
-};
-
-template <std::size_t N>
-void drawStrokes(const StrokeRect (&strokes)[N], uint16_t color)
-{
-    for (const StrokeRect &stroke : strokes)
+    if (k1Down)
     {
-        fillRect(stroke.x, stroke.y, stroke.width, stroke.height, color);
+        return kBoxCenterX - kBoxStep;
+    }
+    if (k2Down)
+    {
+        return kBoxCenterX + kBoxStep;
+    }
+    return currentTargetX;
+}
+
+struct ButtonBoxState
+{
+    int32_t x_ = kBoxCenterX;
+    int32_t targetX_ = kBoxCenterX;
+    bool prevK1_ = false;
+    bool prevK2_ = false;
+};
+
+void updateButtonState(ButtonBoxState &state)
+{
+    const bool k1 = keyPressed(Key1_GPIO_Port, Key1_Pin);
+    const bool k2 = keyPressed(Key2_GPIO_Port, Key2_Pin);
+    const bool k1Down = k1 and not state.prevK1_;
+    const bool k2Down = k2 and not state.prevK2_;
+    state.prevK1_ = k1;
+    state.prevK2_ = k2;
+
+    state.targetX_ = resolveTargetX(state.targetX_, k1Down, k2Down, k1, k2);
+}
+
+void stepBoxMotion(ButtonBoxState &state)
+{
+    const int32_t delta = state.targetX_ - state.x_;
+    if (delta > kBoxSpeedPx)
+    {
+        state.x_ += kBoxSpeedPx;
+    }
+    else if (delta < -kBoxSpeedPx)
+    {
+        state.x_ -= kBoxSpeedPx;
+    }
+    else
+    {
+        state.x_ = state.targetX_;
     }
 }
 
@@ -169,13 +169,39 @@ void drawStrokes(const StrokeRect (&strokes)[N], uint16_t color)
 extern "C" void lcdTest(void)
 {
     printTestStamp();
-    resetPanel();
-    initPanel();
-    fillPanel(0x0000);
-    drawStrokes(kGlyphStrokes, 0xF800);
+
+    const char banner[] = "lcdriv v20 working point @40MHz\r\n";
+    uartWrite(banner, static_cast<uint16_t>(sizeof(banner) - 1));
+
+    // 40 MHz: the one clock that produced a stable picture (v18 P4).
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    HAL_SPI_Init(&hspi1);
+
+    lcd.emplace(&hspi1, kDcPin, kCsPins, kRstPins);
+
+    ButtonBoxState state;
+    composeFrame(state.x_);
+    lcd->pushFrame(0, frameBuffer);
+
+    uint32_t frames = 0;
+    uint32_t lastReport = HAL_GetTick();
 
     while (1)
     {
-        HAL_Delay(1000);
+        updateButtonState(state);
+        stepBoxMotion(state);
+        composeFrame(state.x_);
+        lcd->pushFrame(0, frameBuffer);
+        ++frames;
+
+        if ((HAL_GetTick() - lastReport) >= 5000U)
+        {
+            lastReport = HAL_GetTick();
+            uartText("frames=");
+            uartNumber(frames);
+            uartText(" box=");
+            uartNumber(static_cast<uint32_t>(state.x_));
+            uartText("\r\n");
+        }
     }
 }

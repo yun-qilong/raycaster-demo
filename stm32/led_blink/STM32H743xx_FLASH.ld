@@ -241,6 +241,13 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
+  /* LCD frame buffer, placed in AXI SRAM (not DMA-reachable from DTCM) */
+  .lcdFrameBuffer (NOLOAD) : ALIGN(32)
+  {
+    *(.lcdFrameBuffer)
+    . = ALIGN(32);
+  } >RAM
+
 
 
   /* Remove information from the standard libraries */

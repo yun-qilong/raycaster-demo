@@ -36,6 +36,18 @@ FetchContent_Declare(lcdriv
     GIT_REPOSITORY https://github.com/yun-qilong/lcdriv.git
     GIT_TAG        main
     GIT_SHALLOW    TRUE)
+
+# Build against a local lcdriv checkout when one is present, so the
+# panel-specific adaptations (per-command CS framing, block writes, reset
+# timing) live in the library repository instead of in build/_deps, which
+# FetchContent overwrites on every re-configure.
+# Override with -DFETCHCONTENT_SOURCE_DIR_LCDRIV=<path>.
+# NOTE: FetchContent_Declare already creates FETCHCONTENT_SOURCE_DIR_LCDRIV as
+# an empty cache entry, so the local checkout has to be forced in with FORCE.
+if(NOT FETCHCONTENT_SOURCE_DIR_LCDRIV)
+    set(FETCHCONTENT_SOURCE_DIR_LCDRIV "$ENV{HOME}/lcdriv" CACHE PATH "Local lcdriv checkout" FORCE)
+endif()
+
 FetchContent_MakeAvailable(lcdriv)
 
 # Enable CMake support for ASM, C and C++ languages
