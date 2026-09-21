@@ -68,7 +68,7 @@ _estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);    /* end of RAM */
 _sstack = _estack - _Min_Stack_Size;
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
+_Min_Stack_Size = 0x2000; /* required amount of stack */
 
 /* Define output sections */
 SECTIONS
@@ -248,7 +248,13 @@ SECTIONS
     . = ALIGN(32);
   } >RAM
 
-
+  /* Game RGB24 render buffer, placed in D2 SRAM (AXI is already occupied
+     by the RGB565 double buffer) */
+  .gameFrameBuffer (NOLOAD) : ALIGN(32)
+  {
+    *(.gameFrameBuffer)
+    . = ALIGN(32);
+  } >RAM_D2
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

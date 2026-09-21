@@ -69,6 +69,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/cpp_hello.cpp
     Core/Src/lcd_test.cpp
+    Core/Src/game_main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/platform/mcu/McuPlatform.cpp
 )
 
