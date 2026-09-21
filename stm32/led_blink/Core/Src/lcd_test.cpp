@@ -1,6 +1,6 @@
 #include "main.h"
 
-#include "lcdriv.hpp"
+#include <lcdriv.hpp>
 
 #include <cstring>
 #include <optional>
