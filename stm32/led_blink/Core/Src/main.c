@@ -58,9 +58,9 @@ static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-/* C++ 验证函数：cpp_hello.cpp 中定义，用 extern "C" 导出以便 C 调用 */
+/* MCU 侧 C++ 入口与验证函数，用 extern "C" 导出以便 C 调用 */
 extern void cppHello(void);
-extern void lcdTest(void);
+extern void gameMain(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -112,7 +112,7 @@ int main(void)
      串口打出来的时间应与本次编译时间一致；不一致说明烧到了旧 hex。 */
   const char *buildStamp = "Build: " __DATE__ " " __TIME__ "\r\n";
   HAL_UART_Transmit(&huart1, (uint8_t *)buildStamp, strlen(buildStamp), HAL_MAX_DELAY);
-  lcdTest();
+  gameMain();
   /* USER CODE END 2 */
 
   /* Infinite loop */
