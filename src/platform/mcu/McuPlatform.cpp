@@ -39,11 +39,27 @@ uint32_t McuPlatform::getTicksImpl()
 
 void McuPlatform::sampleInputImpl(InputState &out)
 {
+    const bool key1Held = HAL_GPIO_ReadPin(Key1_GPIO_Port, Key1_Pin) == GPIO_PIN_SET;
+    const bool key2Held = HAL_GPIO_ReadPin(Key2_GPIO_Port, Key2_Pin) == GPIO_PIN_SET;
+
     out.moveX = Fixed::fromInt(0);
     out.moveY = Fixed::fromInt(0);
     out.turnDelta = 0;
     out.heldMask = 0;
     out.quit = false;
+
+    if (key1Held and key2Held)
+    {
+        out.moveY = Fixed::fromInt(1);
+    }
+    else if (key1Held)
+    {
+        out.heldMask |= ACTION_TURN_LEFT;
+    }
+    else if (key2Held)
+    {
+        out.heldMask |= ACTION_TURN_RIGHT;
+    }
 }
 
 void McuPlatform::drawBufferImpl(const Color *pixels)
