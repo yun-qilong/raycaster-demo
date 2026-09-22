@@ -2,6 +2,7 @@
 #include "core/Color.hpp"
 #include "core/Fixed.hpp"
 #include "core/FixedVec2.hpp"
+#include "core/GameLoop.hpp"
 #include "core/Player.hpp"
 #include "core/Raycaster.hpp"
 #include "platform/mcu/McuPlatform.hpp"
@@ -27,12 +28,28 @@ const GpioPin kDcPin{GPIOB, GPIO_PIN_0};
 const GpioPin kCsPin{GPIOA, GPIO_PIN_4};
 const GpioPin kRstPin{GPIOB, GPIO_PIN_1};
 
+constexpr uint32_t kHeartbeatMs = 5000;
+
 std::optional<ray::McuPlatform> g_platform;
 
 void uartText(const char *text)
 {
     HAL_UART_Transmit(&huart1, reinterpret_cast<const uint8_t *>(text),
                       static_cast<uint16_t>(strlen(text)), HAL_MAX_DELAY);
+}
+
+void uartNumber(uint32_t value)
+{
+    char digits[12] = {};
+    int pos = 11;
+    do
+    {
+        digits[--pos] = static_cast<char>('0' + (value % 10U));
+        value /= 10U;
+    } while (value != 0U && pos > 0);
+
+    HAL_UART_Transmit(&huart1, reinterpret_cast<const uint8_t *>(&digits[pos]),
+                      static_cast<uint16_t>(11 - pos), HAL_MAX_DELAY);
 }
 
 ray::Player makePlayer()
@@ -57,19 +74,29 @@ ray::Player makePlayer()
 
 extern "C" void gameMain(void)
 {
-    uartText("game frame test: " __DATE__ " " __TIME__ "\r\n");
+    uartText("game loop test: " __DATE__ " " __TIME__ "\r\n");
 
     g_platform.emplace(&hspi1, kDcPin, kCsPin, kRstPin, g_lcdFrameBuffer);
 
     ray::Player player = makePlayer();
-    ray::renderFrame(player.cam_, g_gameFrameBuffer, ray::McuPlatform::kWidth,
-                     ray::McuPlatform::kHeight);
-    uartText("frame rendered\r\n");
 
-    g_platform->drawBuffer(g_gameFrameBuffer);
-    uartText("frame sent\r\n");
+    ray::GameLoop::run(*g_platform, player, g_gameFrameBuffer,
+                       [](uint32_t, uint32_t, const ray::Player &)
+                       {
+                           static uint32_t lastReport = 0;
+                           static uint32_t frames = 0;
 
-    while (true)
-    {
-    }
+                           ++frames;
+                           const uint32_t now = HAL_GetTick();
+                           if ((now - lastReport) < kHeartbeatMs)
+                           {
+                               return;
+                           }
+
+                           lastReport = now;
+                           uartText("frames=");
+                           uartNumber(frames);
+                           uartText("\r\n");
+                           frames = 0;
+                       });
 }
