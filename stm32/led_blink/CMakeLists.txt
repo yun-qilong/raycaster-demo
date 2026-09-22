@@ -37,6 +37,11 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 set(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g0")
 
+# 32-byte code alignment (the Cortex-M7 I-cache line): without it, unrelated
+# edits swing the static render frame by ~10% (fetch-alignment sensitivity)
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -falign-functions=32 -falign-loops=32")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -falign-functions=32 -falign-loops=32")
+
 include(FetchContent)
 FetchContent_Declare(lcdriv
     GIT_REPOSITORY https://github.com/yun-qilong/lcdriv.git
