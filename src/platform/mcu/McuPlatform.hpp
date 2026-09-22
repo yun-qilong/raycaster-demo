@@ -35,6 +35,8 @@ class McuPlatform final : public Platform<McuPlatform>
     void drawBufferImpl(const Color *pixels);
     [[nodiscard]] int screenWidthImpl() const;
     [[nodiscard]] int screenHeightImpl() const;
+    [[nodiscard]] uint32_t renderedFrames() const;
+    [[nodiscard]] uint32_t pushedFrames() const;
 
   private:
     void configureSpi(SPI_HandleTypeDef *spi);
@@ -45,6 +47,8 @@ class McuPlatform final : public Platform<McuPlatform>
     std::optional<Lcd> lcd_;
     DualFrameBuffer &frameBuffer_;
     int writeIndex_ = 0;
+    uint32_t renderedFrames_ = 0;
+    uint32_t pushedFrames_ = 0;
 };
 
 } // namespace ray

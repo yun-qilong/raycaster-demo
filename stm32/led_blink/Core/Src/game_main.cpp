@@ -84,19 +84,26 @@ extern "C" void gameMain(void)
                        [](uint32_t, uint32_t, const ray::Player &)
                        {
                            static uint32_t lastReport = 0;
-                           static uint32_t frames = 0;
+                           static uint32_t lastRendered = 0;
+                           static uint32_t lastPushed = 0;
 
-                           ++frames;
                            const uint32_t now = HAL_GetTick();
                            if ((now - lastReport) < kHeartbeatMs)
                            {
                                return;
                            }
 
+                           const uint32_t rendered = g_platform->renderedFrames();
+                           const uint32_t pushed = g_platform->pushedFrames();
                            lastReport = now;
-                           uartText("frames=");
-                           uartNumber(frames);
+
+                           uartText("rendered=");
+                           uartNumber(rendered - lastRendered);
+                           uartText(" pushed=");
+                           uartNumber(pushed - lastPushed);
                            uartText("\r\n");
-                           frames = 0;
+
+                           lastRendered = rendered;
+                           lastPushed = pushed;
                        });
 }

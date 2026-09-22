@@ -64,10 +64,12 @@ void McuPlatform::sampleInputImpl(InputState &out)
 
 void McuPlatform::drawBufferImpl(const Color *pixels)
 {
+    ++renderedFrames_;
     convertFrame(pixels, frameBuffer_[writeIndex_]);
     if (lcd_->pushFrame(0, frameBuffer_[writeIndex_]))
     {
         writeIndex_ ^= 1;
+        ++pushedFrames_;
     }
 }
 
@@ -93,6 +95,16 @@ int McuPlatform::screenWidthImpl() const
 int McuPlatform::screenHeightImpl() const
 {
     return kHeight;
+}
+
+uint32_t McuPlatform::renderedFrames() const
+{
+    return renderedFrames_;
+}
+
+uint32_t McuPlatform::pushedFrames() const
+{
+    return pushedFrames_;
 }
 
 } // namespace ray

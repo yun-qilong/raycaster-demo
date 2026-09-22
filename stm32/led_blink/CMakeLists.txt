@@ -17,8 +17,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 
 # Define the build type
+# Default to Release for the game firmware (-O2 is set after project() below)
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 # Set the project name
@@ -30,6 +31,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
+
+# -O2 for the firmware; set after project() to win over the CubeMX toolchain
+# file, which is re-generated with -Os on every CubeMX run
+set(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g0")
 
 include(FetchContent)
 FetchContent_Declare(lcdriv
