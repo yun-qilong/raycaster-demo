@@ -45,20 +45,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -falign-functions=32 -fa
 include(FetchContent)
 FetchContent_Declare(lcdriv
     GIT_REPOSITORY https://github.com/yun-qilong/lcdriv.git
-    GIT_TAG        main
+    GIT_TAG        26R1.0
     GIT_SHALLOW    TRUE)
 
-# Build against a local lcdriv checkout when one is present, so the
-# panel-specific adaptations (per-command CS framing, block writes, reset
-# timing) live in the library repository instead of in build/_deps, which
-# FetchContent overwrites on every re-configure.
-# Override with -DFETCHCONTENT_SOURCE_DIR_LCDRIV=<path>.
-# NOTE: FetchContent_Declare already creates FETCHCONTENT_SOURCE_DIR_LCDRIV as
-# an empty cache entry, so the local checkout has to be forced in with FORCE.
-if(NOT FETCHCONTENT_SOURCE_DIR_LCDRIV)
-    set(FETCHCONTENT_SOURCE_DIR_LCDRIV "$ENV{HOME}/lcdriv" CACHE PATH "Local lcdriv checkout" FORCE)
-endif()
-
+# Develop against a local lcdriv checkout with:
+#   cmake -B build -DFETCHCONTENT_SOURCE_DIR_LCDRIV="$HOME/lcdriv"
 FetchContent_MakeAvailable(lcdriv)
 
 # Enable CMake support for ASM, C and C++ languages
@@ -103,4 +94,12 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     lcdriv
 
     # Add user defined libraries
+)
+
+# ELF -> Intel HEX for the Keil download step (rebuilt on every cmake --build)
+add_custom_target(${CMAKE_PROJECT_NAME}_hex ALL
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.hex
+    DEPENDS ${CMAKE_PROJECT_NAME}
+    COMMENT "Generating ${CMAKE_PROJECT_NAME}.hex"
+    VERBATIM
 )
