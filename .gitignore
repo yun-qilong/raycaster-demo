@@ -42,3 +42,6 @@ src/generated/
 
 # 调试临时文件
 experiments/
+
+# Python venv
+.venv/
