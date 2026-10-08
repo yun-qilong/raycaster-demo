@@ -37,8 +37,9 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 set(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g0")
 
-# 32-byte code alignment (the Cortex-M7 I-cache line): without it, unrelated
-# edits swing the static render frame by ~10% (fetch-alignment sensitivity)
+# 32-byte code alignment: 32B is the Cortex-M7 instruction-fetch / Flash-access
+# granularity. The render inner loop is fetch-alignment sensitive: without this,
+# unrelated edits shift its alignment and swing the static frame rate by ~10%.
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -falign-functions=32 -falign-loops=32")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -falign-functions=32 -falign-loops=32")
 
@@ -55,8 +56,25 @@ FetchContent_MakeAvailable(lcdriv)
 # Enable CMake support for ASM, C and C++ languages
 enable_language(C ASM CXX)
 
+# ---- Code generation: MapData.hpp (scripts/mapgen.py from tools/maps/default.map) ----
+# Mirrors the pc/ tree: a fresh clone has no src/generated/ yet, so the MCU tree
+# generates the map header itself instead of relying on a previous PC build.
+set(RAYCASTER_REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+add_custom_command(
+    OUTPUT ${RAYCASTER_REPO_ROOT}/src/generated/MapData.hpp
+    COMMAND python3 ${RAYCASTER_REPO_ROOT}/scripts/mapgen.py
+    DEPENDS
+        ${RAYCASTER_REPO_ROOT}/scripts/mapgen.py
+        ${RAYCASTER_REPO_ROOT}/tools/maps/default.map
+    WORKING_DIRECTORY ${RAYCASTER_REPO_ROOT}
+    COMMENT "Generating MapData.hpp from default.map"
+)
+add_custom_target(gen_mapdata DEPENDS ${RAYCASTER_REPO_ROOT}/src/generated/MapData.hpp)
+
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
+
+add_dependencies(${CMAKE_PROJECT_NAME} gen_mapdata)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
