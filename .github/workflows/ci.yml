@@ -3,10 +3,17 @@ name: CI
 on:
   push:
     branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   post-check:
-    runs-on: ubuntu-latest
+    # 固定 runner，不要用 ubuntu-latest：2026-09 起 ubuntu-latest 已迁移到
+    # Ubuntu 26.04（resolute），该版本不再提供 clang-format-15 / clang-tidy-14，
+    # apt 会直接报 "Unable to locate package"。
+    # 这两个版本必须与本地开发机（Ubuntu 22.04）一致：noble(24.04) 的 universe
+    # 源仍提供 clang-format-15(15.0.7) / clang-tidy-14(14.0.6)，格式与 tidy
+    # 结果才和本地一致。后续升级本地的 clang 版本时，这里也要同步改。
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -22,6 +29,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libsdl2-dev python3 clang-format-15 clang-tidy-14
+          clang-format-15 --version
+          clang-tidy-14 --version
 
       - name: Build
         run: |
