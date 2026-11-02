@@ -10,6 +10,8 @@ struct SDL_Texture;
 namespace ray
 {
 
+using onyx::infra::Color;
+
 class SdlPlatform final : public Platform<SdlPlatform>
 {
   public:

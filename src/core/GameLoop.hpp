@@ -1,11 +1,11 @@
-// src/core/GameLoop.hpp — 游戏主循环（平台无关；固定时间步长）
+// src/infra/GameLoop.hpp — 游戏主循环（平台无关；固定时间步长）
 // 通过模板参数适配各平台后端（SdlPlatform / McuPlatform）；帧缓冲与调试钩子由调用方提供。
 #pragma once
 
-#include "core/Color.hpp"
-#include "core/Movement.hpp"
-#include "core/Player.hpp"
-#include "core/Raycaster.hpp"
+#include "infra/Color.hpp"
+#include "infra/Movement.hpp"
+#include "infra/Player.hpp"
+#include "infra/Raycaster.hpp"
 #include "platform/api/Platform.hpp"
 
 #include <algorithm>
@@ -13,6 +13,11 @@
 
 namespace ray
 {
+
+using onyx::infra::Color;
+namespace Movement = onyx::infra::Movement;
+using onyx::infra::Player;
+using onyx::infra::renderFrame;
 
 class GameLoop
 {
@@ -68,7 +73,7 @@ class GameLoop
         accumulator += elapsed;
         while (accumulator >= kTickMs)
         {
-            InputState input;
+            ray::InputState input;
             platform.sampleInput(input);
 
             if (input.quit)

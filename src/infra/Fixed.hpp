@@ -1,10 +1,10 @@
-// src/core/Fixed.hpp — 16.16 定点数（可移植红线：不用 float）
+// src/infra/Fixed.hpp — 16.16 定点数（可移植红线：不用 float）
 // 1 = 0x00010000；范围约 [-32768, 32767.99998]
 #pragma once
 
 #include <cstdint>
 
-namespace ray
+namespace onyx::infra
 {
 
 class Fixed
@@ -100,4 +100,4 @@ class Fixed
 
 static_assert(sizeof(Fixed) == 4, "Fixed must be 4 bytes (MCU-friendly)");
 
-} // namespace ray
+} // namespace onyx::infra

@@ -1,15 +1,15 @@
-// src/core/Movement.hpp — 移动逻辑（输入 -> 位移/旋转）
+// src/infra/Movement.hpp — 移动逻辑（输入 -> 位移/旋转）
 #pragma once
 
-#include "core/Collision.hpp"
-#include "core/Fixed.hpp"
-#include "core/Mat2x2.hpp"
-#include "core/Player.hpp"
+#include "infra/Collision.hpp"
+#include "infra/Fixed.hpp"
+#include "infra/Mat2x2.hpp"
+#include "infra/Player.hpp"
 #include "platform/api/Platform.hpp"
 
-namespace ray
+namespace onyx::infra
 {
-
+using onyx::infra::FixedVec2;
 namespace Movement
 {
 
@@ -24,7 +24,7 @@ inline void rotate(Player &p, Fixed angle)
     rot.mulVecInPlace(p.cam_.plane_);
 }
 
-inline void update(Player &p, const InputState &input)
+inline void update(Player &p, const ray::InputState &input)
 {
     Fixed forward = input.moveY * kMoveSpeed;
     Fixed strafe = input.moveX * kMoveSpeed;
@@ -41,11 +41,11 @@ inline void update(Player &p, const InputState &input)
     }
 
     int keyTurn = 0;
-    if (input.heldMask & ACTION_TURN_RIGHT)
+    if (input.heldMask & ray::ACTION_TURN_RIGHT)
     {
         keyTurn = keyTurn - 1;
     }
-    if (input.heldMask & ACTION_TURN_LEFT)
+    if (input.heldMask & ray::ACTION_TURN_LEFT)
     {
         keyTurn = keyTurn + 1;
     }
@@ -57,4 +57,4 @@ inline void update(Player &p, const InputState &input)
 
 } // namespace Movement
 
-} // namespace ray
+} // namespace onyx::infra

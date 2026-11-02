@@ -1,10 +1,10 @@
-// src/core/Collision.hpp — 碰撞检测（AABB vs 网格）
+// src/infra/Collision.hpp — 碰撞检测（AABB vs 网格）
 #pragma once
 
-#include "core/Fixed.hpp"
-#include "core/Map.hpp"
+#include "infra/Fixed.hpp"
+#include "infra/Map.hpp"
 
-namespace ray
+namespace onyx::infra
 {
 
 namespace Collision
@@ -56,4 +56,4 @@ inline bool canMove(Fixed x, Fixed y, Fixed radius)
 
 } // namespace Collision
 
-} // namespace ray
+} // namespace onyx::infra

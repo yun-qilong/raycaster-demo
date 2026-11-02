@@ -1,10 +1,10 @@
 // Core/Src/game_main.cpp — MCU 侧游戏入口：缓冲存储 + 平台组装
-#include "core/Color.hpp"
-#include "core/Fixed.hpp"
-#include "core/FixedVec2.hpp"
 #include "core/GameLoop.hpp"
-#include "core/Player.hpp"
-#include "core/Raycaster.hpp"
+#include "infra/Color.hpp"
+#include "infra/Fixed.hpp"
+#include "infra/FixedVec2.hpp"
+#include "infra/Player.hpp"
+#include "infra/Raycaster.hpp"
 #include "platform/mcu/McuPlatform.hpp"
 
 #include "main.h"
@@ -22,7 +22,7 @@ __attribute__((section(".lcdFrameBuffer"), aligned(32)))
 ray::McuPlatform::DualFrameBuffer g_lcdFrameBuffer;
 
 __attribute__((section(".gameFrameBuffer"), aligned(32)))
-ray::Color g_gameFrameBuffer[ray::McuPlatform::kWidth * ray::McuPlatform::kHeight];
+onyx::infra::Color g_gameFrameBuffer[ray::McuPlatform::kWidth * ray::McuPlatform::kHeight];
 
 const GpioPin kDcPin{GPIOB, GPIO_PIN_0};
 const GpioPin kCsPin{GPIOA, GPIO_PIN_4};
@@ -52,20 +52,22 @@ void uartNumber(uint32_t value)
                       static_cast<uint16_t>(11 - pos), HAL_MAX_DELAY);
 }
 
-ray::Player makePlayer()
+onyx::infra::Player makePlayer()
 {
-    ray::Player player;
-    player.cam_.pos_ = ray::FixedVec2{
-        ray::Fixed::fromInt(8) + ray::Fixed::fromInt(1) / ray::Fixed::fromInt(2),
-        ray::Fixed::fromInt(5) + ray::Fixed::fromInt(1) / ray::Fixed::fromInt(2),
+    onyx::infra::Player player;
+    player.cam_.pos_ = onyx::infra::FixedVec2{
+        onyx::infra::Fixed::fromInt(8) +
+            onyx::infra::Fixed::fromInt(1) / onyx::infra::Fixed::fromInt(2),
+        onyx::infra::Fixed::fromInt(5) +
+            onyx::infra::Fixed::fromInt(1) / onyx::infra::Fixed::fromInt(2),
     };
-    player.cam_.dir_ = ray::FixedVec2{
-        ray::Fixed::fromInt(-1),
-        ray::Fixed::fromInt(0),
+    player.cam_.dir_ = onyx::infra::FixedVec2{
+        onyx::infra::Fixed::fromInt(-1),
+        onyx::infra::Fixed::fromInt(0),
     };
-    player.cam_.plane_ = ray::FixedVec2{
-        ray::Fixed::fromInt(0),
-        ray::Fixed::fromInt(2) / ray::Fixed::fromInt(3),
+    player.cam_.plane_ = onyx::infra::FixedVec2{
+        onyx::infra::Fixed::fromInt(0),
+        onyx::infra::Fixed::fromInt(2) / onyx::infra::Fixed::fromInt(3),
     };
     return player;
 }
@@ -78,10 +80,10 @@ extern "C" void gameMain(void)
 
     g_platform.emplace(&hspi1, kDcPin, kCsPin, kRstPin, g_lcdFrameBuffer);
 
-    ray::Player player = makePlayer();
+    onyx::infra::Player player = makePlayer();
 
     ray::GameLoop::run(*g_platform, player, g_gameFrameBuffer,
-                       [](uint32_t, uint32_t, const ray::Player &)
+                       [](uint32_t, uint32_t, const onyx::infra::Player &)
                        {
                            static uint32_t lastReport = 0;
                            static uint32_t lastRendered = 0;

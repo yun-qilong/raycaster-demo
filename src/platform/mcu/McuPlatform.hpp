@@ -13,6 +13,8 @@
 namespace ray
 {
 
+using onyx::infra::Color;
+
 class McuPlatform final : public Platform<McuPlatform>
 {
   public:

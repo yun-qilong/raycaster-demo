@@ -1,12 +1,12 @@
-// src/core/Mat2x2.hpp — 2×2 矩阵（列向量存储，定点数）
+// src/infra/Mat2x2.hpp — 2×2 矩阵（列向量存储，定点数）
 #pragma once
 
-#include "core/Fixed.hpp"
-#include "core/FixedVec2.hpp"
-#include "core/Trig.hpp"
-#include "core/Vec2.hpp"
+#include "infra/Fixed.hpp"
+#include "infra/FixedVec2.hpp"
+#include "infra/Trig.hpp"
+#include "infra/Vec2.hpp"
 
-namespace ray
+namespace onyx::infra
 {
 
 class Mat2x2
@@ -95,4 +95,4 @@ class Mat2x2
     Vec2<Fixed> col1_;
 };
 
-} // namespace ray
+} // namespace onyx::infra

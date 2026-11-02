@@ -3,6 +3,8 @@
 namespace ray
 {
 
+using onyx::infra::Fixed;
+
 namespace
 {
 

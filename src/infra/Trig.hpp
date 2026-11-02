@@ -1,12 +1,12 @@
-// src/core/Trig.hpp — 定点数三角函数查表（sin/cos，256 步，无浮点）
+// src/infra/Trig.hpp — 定点数三角函数查表（sin/cos，256 步，无浮点）
 // 精度：256 步 = 每步 1.4°，对 raycaster 场景旋转足够。
 #pragma once
 
-#include "core/Fixed.hpp"
+#include "infra/Fixed.hpp"
 
 #include <cstdint>
 
-namespace ray
+namespace onyx::infra
 {
 
 namespace Trig
@@ -111,4 +111,4 @@ inline Fixed cos(Fixed angle)
 
 } // namespace Trig
 
-} // namespace ray
+} // namespace onyx::infra

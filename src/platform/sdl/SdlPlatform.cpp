@@ -5,6 +5,8 @@
 namespace ray
 {
 
+using onyx::infra::Fixed;
+
 namespace
 {
 constexpr Uint32 kPixelFormat = SDL_PIXELFORMAT_RGB24;

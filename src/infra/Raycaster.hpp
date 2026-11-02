@@ -1,18 +1,18 @@
 // 逐列发射射线，DDA 求墙距，画垂直墙条带。全定点数，无堆，零平台依赖。
 #pragma once
 
-#include "core/Color.hpp"
-#include "core/Fixed.hpp"
-#include "core/FixedVec2.hpp"
-#include "core/Map.hpp"
-#include "core/Vec2.hpp"
+#include "infra/Color.hpp"
+#include "infra/Fixed.hpp"
+#include "infra/FixedVec2.hpp"
+#include "infra/Map.hpp"
+#include "infra/Vec2.hpp"
 
 #include <algorithm>
 #include <cstdint>
 
-namespace ray
+namespace onyx::infra
 {
-
+using onyx::infra::FixedVec2;
 enum class WallOrientation : uint8_t
 {
     Horizontal,
@@ -244,4 +244,4 @@ inline void renderFrame(const Camera &cam, Color *pixels, int width, int height)
     }
 }
 
-} // namespace ray
+} // namespace onyx::infra

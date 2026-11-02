@@ -2,14 +2,18 @@
 // core 只依赖此接口，零平台宏。SDL（PC）与未来 MCU 后端各自实现。
 #pragma once
 
-#include "core/Color.hpp"
-#include "core/Fixed.hpp"
+#include "infra/Color.hpp"
+#include "infra/Fixed.hpp"
 #include "utils/CrtpBase.hpp"
 
 #include <cstdint>
 
 namespace ray
 {
+
+using onyx::infra::Color;
+
+using onyx::infra::Fixed;
 
 // 功能键掩码
 constexpr uint32_t ACTION_QUIT = 1u << 0;

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ray
+namespace onyx::infra
 {
 
 template <typename T>
@@ -14,4 +14,4 @@ struct Vec2
     constexpr Vec2(T x, T y) : x_(x), y_(y) {}
 };
 
-} // namespace ray
+} // namespace onyx::infra
