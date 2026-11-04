@@ -1,16 +1,20 @@
 #pragma once
 
-#include "infra/Fixed.hpp"
+#include "algos/Fixed.hpp"
+
+#include <cstdint>
 
 namespace onyx::contracts::doomlike
 {
 
+constexpr algos::Fixed kKeyTurnStep = algos::Fixed::fromRaw(0x0800);
+constexpr int32_t kPointerTurnScale = 200;
+
 struct Input
 {
-    onyx::infra::Fixed moveX_ = onyx::infra::Fixed::fromInt(0);
-    onyx::infra::Fixed moveY_ = onyx::infra::Fixed::fromInt(0);
-    onyx::infra::Fixed turn_ = onyx::infra::Fixed::fromInt(0);
-    bool quit_ = false;
+    algos::Fixed moveX_ = algos::Fixed::fromInt(0);
+    algos::Fixed moveY_ = algos::Fixed::fromInt(0);
+    algos::Fixed turn_ = algos::Fixed::fromInt(0);
 };
 
 } // namespace onyx::contracts::doomlike

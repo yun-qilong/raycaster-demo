@@ -1,9 +1,9 @@
 // tests/TestFixed.cpp — 16.16 定点数冒烟测试
-#include "infra/Fixed.hpp"
+#include "algos/Fixed.hpp"
 
 #include <gtest/gtest.h>
 
-using onyx::infra::Fixed;
+using onyx::algos::Fixed;
 
 TEST(FixedTest, FromIntAndToInt)
 {

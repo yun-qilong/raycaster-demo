@@ -1,12 +1,12 @@
-// src/infra/Mat2x2.hpp — 2×2 矩阵（列向量存储，定点数）
+// src/algos/Mat2x2.hpp — 2×2 矩阵（列向量存储，定点数）
 #pragma once
 
-#include "infra/Fixed.hpp"
-#include "infra/FixedVec2.hpp"
-#include "infra/Trig.hpp"
-#include "infra/Vec2.hpp"
+#include "algos/Fixed.hpp"
+#include "algos/FixedVec2.hpp"
+#include "algos/Trig.hpp"
+#include "algos/Vec2.hpp"
 
-namespace onyx::infra
+namespace onyx::algos
 {
 
 class Mat2x2
@@ -16,8 +16,10 @@ class Mat2x2
 
     constexpr Mat2x2(FixedVec2 c0, FixedVec2 c1) : col0_{c0.x_, c0.y_}, col1_{c1.x_, c1.y_} {}
 
-    explicit Mat2x2(Fixed angle)
-        : col0_{Trig::cos(angle), Trig::sin(angle)}, col1_{-Trig::sin(angle), Trig::cos(angle)}
+    explicit Mat2x2(Fixed angle) : Mat2x2(Trig::cos(angle), Trig::sin(angle)) {}
+
+    constexpr Mat2x2(Fixed cosAngle, Fixed sinAngle)
+        : col0_{cosAngle, sinAngle}, col1_{-sinAngle, cosAngle}
     {
     }
 
@@ -95,4 +97,4 @@ class Mat2x2
     Vec2<Fixed> col1_;
 };
 
-} // namespace onyx::infra
+} // namespace onyx::algos

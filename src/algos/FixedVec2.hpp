@@ -1,10 +1,10 @@
-// src/infra/FixedVec2.hpp — 2D 定点向量（向量运算，兼容 POD 访问）
+// src/algos/FixedVec2.hpp — 2D 定点向量（向量运算，兼容 POD 访问）
 #pragma once
 
-#include "infra/Fixed.hpp"
-#include "infra/Trig.hpp"
+#include "algos/Fixed.hpp"
+#include "algos/Trig.hpp"
 
-namespace onyx::infra
+namespace onyx::algos
 {
 
 class FixedVec2
@@ -77,4 +77,4 @@ class FixedVec2
     }
 };
 
-} // namespace onyx::infra
+} // namespace onyx::algos

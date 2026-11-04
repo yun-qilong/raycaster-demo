@@ -9,7 +9,7 @@ namespace onyx::base
 {
 
 template <typename Derived, typename PlantT, typename ContractT>
-class AppBase : public ray::utils::CrtpBase<Derived>
+class AppBase : public utils::CrtpBase<Derived>
 {
     static_assert(std::is_base_of_v<PlantBaseTag, PlantT>, "PlantT must derive from PlantBase");
     static_assert(std::is_same_v<ContractT, typename PlantT::Contract>,

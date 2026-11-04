@@ -14,7 +14,7 @@ class PlantBaseTag
 };
 
 template <typename Derived, typename ContractT, typename PixelT, Resolution SelectedResolutionT>
-class PlantBase : public ray::utils::CrtpBase<Derived>, public PlantBaseTag
+class PlantBase : public utils::CrtpBase<Derived>, public PlantBaseTag
 {
     static_assert(static_cast<std::size_t>(SelectedResolutionT) < kResolutionTable.size(),
                   "selected resolution out of range");

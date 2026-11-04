@@ -1,4 +1,4 @@
-HeaderFilterRegex: '.*/(src/(base|contracts|core|infra|platform|utils)/|pc/).*\.(hpp|cpp)$'
+HeaderFilterRegex: '.*/(src/(algos|app|base|contracts|platform|utils)/|pc/).*\.(hpp|cpp)$'
 
 Checks: >
   -*,

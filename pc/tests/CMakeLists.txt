@@ -9,9 +9,10 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(raycaster_ut
     TestFixed.cpp
+    TestDdaCaster.cpp
 )
 target_include_directories(raycaster_ut PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
-target_link_libraries(raycaster_ut PRIVATE infra GTest::gtest_main)
+target_link_libraries(raycaster_ut PRIVATE GTest::gtest_main)
 add_dependencies(raycaster_ut gen_mapdata)
 
 include(GoogleTest)

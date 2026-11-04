@@ -38,8 +38,6 @@ add_custom_target(gen_mapdata DEPENDS ${RAYCASTER_REPO_ROOT}/src/generated/MapDa
 
 # ---- 共享代码（与 MCU 构建树共用同一份源码，各自按需引入）------------
 add_subdirectory(${RAYCASTER_REPO_ROOT}/src/utils utils)
-add_subdirectory(${RAYCASTER_REPO_ROOT}/src/infra infra)
-add_subdirectory(${RAYCASTER_REPO_ROOT}/src/platform/api platform_api)
 add_subdirectory(${RAYCASTER_REPO_ROOT}/src/platform/sdl platform_sdl)
 
 # ---- 主程序 -----------------------------------------------------
@@ -48,7 +46,7 @@ add_executable(raycaster
     NoHeap.cpp
 )
 target_include_directories(raycaster PRIVATE ${RAYCASTER_REPO_ROOT}/src)
-target_link_libraries(raycaster PRIVATE infra platform_sdl)
+target_link_libraries(raycaster PRIVATE platform_sdl)
 raycaster_portable_flags(raycaster)
 add_dependencies(raycaster gen_mapdata)
 

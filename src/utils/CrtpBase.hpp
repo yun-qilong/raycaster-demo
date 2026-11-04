@@ -23,7 +23,7 @@
 
 #pragma once
 
-namespace ray::utils
+namespace onyx::utils
 {
 
 template <typename Derived>
@@ -41,4 +41,4 @@ class CrtpBase
     }
 };
 
-} // namespace ray::utils
+} // namespace onyx::utils

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace onyx::infra
+namespace onyx::algos
 {
 
 template <typename T>
@@ -14,4 +14,4 @@ struct Vec2
     constexpr Vec2(T x, T y) : x_(x), y_(y) {}
 };
 
-} // namespace onyx::infra
+} // namespace onyx::algos

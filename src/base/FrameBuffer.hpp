@@ -33,18 +33,6 @@ class FrameBufferT
         return pixels_[y * stride() + x];
     }
 
-    void fill(PixelT color) const noexcept
-    {
-        for (int y = 0; y < height(); ++y)
-        {
-            PixelT *row = pixels_ + y * stride();
-            for (int x = 0; x < width(); ++x)
-            {
-                row[x] = color;
-            }
-        }
-    }
-
   private:
     static constexpr ResolutionInfo kInfo = kResolutionTable[static_cast<std::size_t>(ResolutionT)];
 
