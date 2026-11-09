@@ -1,10 +1,12 @@
 #pragma once
 
 #include "base/FrameBuffer.hpp"
+#include "base/Pixel.hpp"
 #include "base/Resolution.hpp"
 #include "utils/CrtpBase.hpp"
 
 #include <cstddef>
+#include <type_traits>
 
 namespace onyx::base
 {
@@ -18,6 +20,8 @@ class PlantBase : public utils::CrtpBase<Derived>, public PlantBaseTag
 {
     static_assert(static_cast<std::size_t>(SelectedResolutionT) < kResolutionTable.size(),
                   "selected resolution out of range");
+    static_assert(not std::is_same_v<PixelT, Color>,
+                  "plant pixel must be an encoding (Rgb888 / Rgb565), not the semantic Color");
 
   public:
     using Contract = ContractT;

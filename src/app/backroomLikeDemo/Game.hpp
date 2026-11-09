@@ -1,4 +1,3 @@
-// src/app/backroomLikeDemo/Game.hpp — 本游戏：世界推进与画面绘制
 #pragma once
 
 #include "algos/DdaCaster.hpp"
@@ -39,24 +38,23 @@ class Game : public base::AppBase<Game<PlantT>, PlantT, contracts::doomlike::Con
         return snapshot_;
     }
 
-    template <typename FrameBufferT>
-    void drawFrame(const contracts::doomlike::Snapshot &snapshot, FrameBufferT &frameBuffer)
+    void drawFrame(const contracts::doomlike::Snapshot &snapshot, FrameBuffer &frameBuffer)
     {
         const algos::Camera camera{snapshot.pos_, snapshot.dir_, snapshot.plane_};
         DdaCaster::cast(map_, camera, columns_);
 
         fillBackground(frameBuffer);
 
-        for (int x = 0; x < FrameBufferT::width(); ++x)
+        for (int x = 0; x < FrameBuffer::width(); ++x)
         {
             drawColumn(frameBuffer, x, columns_[static_cast<std::size_t>(x)]);
         }
     }
 
   private:
-    static constexpr base::Rgb888 kCeiling{72, 72, 96};
-    static constexpr base::Rgb888 kFloor{64, 48, 32};
-    static constexpr base::Rgb888 kFog{32, 32, 40};
+    static constexpr base::Color kCeiling{72, 72, 96};
+    static constexpr base::Color kFloor{64, 48, 32};
+    static constexpr base::Color kFog{32, 32, 40};
 
     static Player makeDefaultPlayer()
     {
@@ -73,44 +71,27 @@ class Game : public base::AppBase<Game<PlantT>, PlantT, contracts::doomlike::Con
         return player;
     }
 
-    template <typename FrameBufferT>
-    static void fillBackground(FrameBufferT &frameBuffer)
+    static void fillBackground(FrameBuffer &frameBuffer)
     {
-        for (int y = 0; y < FrameBufferT::height(); ++y)
-        {
-            const base::Rgb888 color = (y < FrameBufferT::height() / 2) ? kCeiling : kFloor;
-
-            for (int x = 0; x < FrameBufferT::width(); ++x)
-            {
-                frameBuffer.pixelAt(x, y) = color;
-            }
-        }
+        const int horizon = FrameBuffer::height() / 2;
+        frameBuffer.fillColor(0, 0, FrameBuffer::width() - 1, horizon - 1, kCeiling);
+        frameBuffer.fillColor(0, horizon, FrameBuffer::width() - 1, FrameBuffer::height() - 1,
+                              kFloor);
     }
 
-    template <typename FrameBufferT>
-    void drawColumn(FrameBufferT &frameBuffer, int x, const algos::ColumnHit &hit) const
+    void drawColumn(FrameBuffer &frameBuffer, int x, const algos::ColumnHit &hit) const
     {
-        const base::Rgb888 color = hit.hit_ ? shadedWallColor(hit) : kFog;
-
-        for (int y = hit.stripeTop_; y <= hit.stripeBottom_; ++y)
-        {
-            frameBuffer.pixelAt(x, y) = color;
-        }
+        frameBuffer.fillColor(x, hit.stripeTop_, x, hit.stripeBottom_,
+                              hit.hit_ ? shadedWallColor(hit) : kFog);
     }
 
-    [[nodiscard]] base::Rgb888 shadedWallColor(const algos::ColumnHit &hit) const
+    [[nodiscard]] base::Color shadedWallColor(const algos::ColumnHit &hit) const
     {
         const int factor = (hit.hitSide_ == algos::WallOrientation::Horizontal) ? 150 : 255;
-        const base::Rgb888 base = wallColor(map_.tileAt(hit.grid_.x_, hit.grid_.y_));
-
-        return {
-            shadeChannel(base.r_, factor),
-            shadeChannel(base.g_, factor),
-            shadeChannel(base.b_, factor),
-        };
+        return shade(wallColor(map_.tileAt(hit.grid_.x_, hit.grid_.y_)), factor);
     }
 
-    static constexpr base::Rgb888 wallColor(WallType wall)
+    static constexpr base::Color wallColor(WallType wall)
     {
         switch (wall)
         {
@@ -121,6 +102,15 @@ class Game : public base::AppBase<Game<PlantT>, PlantT, contracts::doomlike::Con
         default:
             return {200, 200, 200};
         }
+    }
+
+    static constexpr base::Color shade(base::Color color, int factor)
+    {
+        return {
+            shadeChannel(color.r_, factor),
+            shadeChannel(color.g_, factor),
+            shadeChannel(color.b_, factor),
+        };
     }
 
     static constexpr uint8_t shadeChannel(uint8_t value, int factor)

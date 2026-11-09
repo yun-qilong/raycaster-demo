@@ -6,10 +6,16 @@
     "cppcoreguidelines-pro-bounds-pointer-arithmetic": 1,
     "cppcoreguidelines-pro-type-vararg": 1,
     "modernize-concat-nested-namespaces": 3,
-    "modernize-use-auto": 3,
     "readability-convert-member-functions-to-static": 1,
-    "readability-identifier-naming": 8,
-    "readability-uppercase-literal-suffix": 5
+    "readability-identifier-naming": 8
+  },
+  "pc/tests/TestAppPixelFormat.cpp": {
+    "cppcoreguidelines-pro-bounds-constant-array-index": 2,
+    "cppcoreguidelines-pro-bounds-pointer-arithmetic": 1,
+    "modernize-concat-nested-namespaces": 3,
+    "readability-convert-member-functions-to-static": 1,
+    "readability-function-cognitive-complexity": 1,
+    "readability-identifier-naming": 8
   },
   "pc/tests/TestDdaCaster.cpp": {
     "cppcoreguidelines-pro-bounds-constant-array-index": 2,
@@ -23,8 +29,6 @@
     "cppcoreguidelines-pro-bounds-constant-array-index": 4,
     "cppcoreguidelines-pro-bounds-pointer-arithmetic": 1,
     "modernize-concat-nested-namespaces": 1,
-    "modernize-use-auto": 3,
-    "readability-identifier-naming": 8,
-    "readability-uppercase-literal-suffix": 5
+    "readability-identifier-naming": 8
   }
 }
