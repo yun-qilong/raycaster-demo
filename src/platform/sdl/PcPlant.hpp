@@ -37,7 +37,7 @@ class PcPlant : public base::PlantBase<PcPlant, contracts::doomlike::Contract, b
     void putSnapshotImpl(const Snapshot &snapshot);
     [[nodiscard]] const Snapshot *getSnapshotImpl() const noexcept;
     [[nodiscard]] base::Rgb888 *pixelBufferImpl() noexcept;
-    void submitFrameImpl();
+    [[nodiscard]] bool submitFrameImpl();
 
     [[nodiscard]] uint32_t nowMs() const noexcept;
     [[nodiscard]] bool quitRequested() const noexcept;

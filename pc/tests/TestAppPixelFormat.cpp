@@ -64,7 +64,10 @@ class StubPlant
         return pixels_.data();
     }
 
-    void submitFrameImpl() {}
+    [[nodiscard]] bool submitFrameImpl()
+    {
+        return true;
+    }
 
     [[nodiscard]] const Pixels &pixels() const noexcept
     {

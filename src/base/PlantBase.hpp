@@ -54,9 +54,9 @@ class PlantBase : public utils::CrtpBase<Derived>, public PlantBaseTag
         return FrameBuffer{this->getImplementation().pixelBufferImpl()};
     }
 
-    void submitFrame()
+    [[nodiscard]] bool submitFrame()
     {
-        this->getImplementation().submitFrameImpl();
+        return this->getImplementation().submitFrameImpl();
     }
 };
 

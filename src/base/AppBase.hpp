@@ -40,7 +40,7 @@ class AppBase : public utils::CrtpBase<Derived>
 
         auto frameBuffer = plant_.requestFrameBuffer();
         this->getImplementation().drawFrame(*snapshot, frameBuffer);
-        plant_.submitFrame();
+        static_cast<void>(plant_.submitFrame());
     }
 
   private:

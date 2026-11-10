@@ -138,12 +138,13 @@ base::Rgb888 *PcPlant::pixelBufferImpl() noexcept
     return pixels_;
 }
 
-void PcPlant::submitFrameImpl()
+bool PcPlant::submitFrameImpl()
 {
     SDL_UpdateTexture(texture_, nullptr, pixels_, kWidth * kBytesPerPixel);
     SDL_RenderClear(renderer_);
     SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
     SDL_RenderPresent(renderer_);
+    return true;
 }
 
 uint32_t PcPlant::nowMs() const noexcept
