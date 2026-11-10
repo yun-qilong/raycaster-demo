@@ -11,8 +11,8 @@
 
 - **格式**：开头是 `//` 图例与坐标说明，随后是列号表头，数据行形如 `23 ########################`（行号 + 地图行），
   `//` 之后为注释。坐标是数学坐标：**文件最上面一行是场景顶（y=23），最下面一行是 y=0**，生成时按此做行序翻转。
-- **校验**：必须 24×24、字符必须在图例内，出错会报出行列位置；查询越界格子按墙处理（见 `src/core/Map.hpp`）。
-- **生成的符号**：`kMapWidth` / `kMapHeight` / `kTiles[y][x]`，取值对应 `ray::WallType`（0 空地 / 1 砖 / 2 石）。
+- **校验**：必须 24×24、字符必须在图例内，出错会报出行列位置；查询越界格子按墙处理（见 `src/app/backroomLikeDemo/Map.hpp`）。
+- **生成的符号**：`kMapWidth` / `kMapHeight` / `kTiles[y][x]`，取值对应 `onyx::app::backroomLikeDemo::WallType`（0 空地 / 1 砖 / 2 石）。
 - **生成时机**：`pc/` 与 `stm32/` 两条构建树都挂了 CMake 自定义目标 `gen_mapdata`——`default.map` 或 `scripts/mapgen.py`
   一变即重新生成，产物 `src/generated/MapData.hpp` 不入库。全新 clone 直接构建任一端都会先自动生成该头文件，
   改地图 = 编辑 `.map` 后重新构建，不必手跑脚本。
@@ -24,7 +24,7 @@ python3 scripts/mapgen.py                                  # 默认 default.map 
 python3 scripts/mapgen.py --input tools/maps/other.map     # 换输入地图
 ```
 
-> 注意：输出路径固定为 `src/generated/MapData.hpp`（`src/core/Map.hpp` 按该路径 include），
+> 注意：输出路径固定为 `src/generated/MapData.hpp`（`src/app/backroomLikeDemo/Map.hpp` 按该路径 include），
 > 所以同一时刻只有一张"活动地图"；`--output` 只在脱离构建树单独调试时有用。
 
 ## 约定

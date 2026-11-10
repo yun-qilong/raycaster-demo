@@ -72,5 +72,5 @@
 ## 相关文件
 
 - 固件与外设配置：`stm32/led_blink/`（`led_blink.ioc` 中 `SPI1.NSSPMode=SPI_NSS_PULSE_DISABLE`、`SPI1.CalculateBaudRate=40.0 MBits/s`）
-- 出帧路径：`src/platform/mcu/McuPlatform.cpp`
+- 出帧路径：`src/platform/mcu/McuPlatform.cpp`（26R1 版本；FT0003-C 落地后为 `src/platform/mcu/McuPlant.cpp`）
 - 帧预算与节拍分析：[根 README 的性能实测节](../README.md#性能实测)
